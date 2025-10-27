@@ -1,0 +1,7 @@
+<!-- This is a placeholder SVG for movie posters when no image is available -->
+<svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="600" fill="#374151"/>
+  <path d="M150 250L200 300L250 250" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="200" cy="200" r="30" stroke="#9CA3AF" stroke-width="2"/>
+  <text x="200" y="400" text-anchor="middle" fill="#9CA3AF" font-family="Arial, sans-serif" font-size="16">No Image Available</text>
+</svg>
