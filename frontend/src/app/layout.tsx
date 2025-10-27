@@ -1,20 +1,16 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { DM_Sans } from 'next/font/google';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-dm-sans',
 });
 
 export const metadata: Metadata = {
-  title: "MovieBox - Movie & TV Show Tracker",
-  description: "Track your favorite movies and TV shows, create watchlists, and discover trending content",
+  title: 'MovieBox Tracker',
+  description: 'Track your favorite movies and TV shows.',
 };
 
 export default function RootLayout({
@@ -23,12 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="en" className={`${dmSans.variable}`}>
+      <body className="bg-black text-white font-sans">{children}</body>
     </html>
   );
 }
