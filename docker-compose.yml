@@ -37,7 +37,7 @@ services:
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/movietracker?authSource=admin
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
       JWT_EXPIRE: 7d
-      TMDB_API_KEY: ${TMDB_API_KEY:-your-tmdb-api-key-here}
+      TMDB_API_KEY: 5d48393e4f2ef4e995c297e64192374d
       TMDB_BASE_URL: https://api.themoviedb.org/3
       CORS_ORIGIN: http://localhost:3000,http://localhost:3001
       RATE_LIMIT_WINDOW_MS: 900000
