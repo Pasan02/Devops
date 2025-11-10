@@ -17,8 +17,7 @@ on:
 
 env:
   DOCKER_USERNAME: pasan02
-  BACKEND_IMAGE: pasan02/devops-backend
-  FRONTEND_IMAGE: pasan02/devops-frontend
+  DOCKER_REPO: pasan02/devops
 
 jobs:
   # Build and push backend image
@@ -42,11 +41,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.BACKEND_IMAGE }}
+          images: ${{ env.DOCKER_REPO }}
           tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,value=backend-latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,value=backend-{{branch}}
+            type=raw,value=backend-{{sha}}
 
       - name: Build and push Backend Docker image
         uses: docker/build-push-action@v5
@@ -57,15 +56,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           target: production
-          # Remove cache-from/cache-to temporarily to avoid permission issues
-          # cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
-          # cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
 
       - name: Backend build summary
         run: |
           echo "### Backend Build Complete! 🚀" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ env.DOCKER_REPO }}" >> $GITHUB_STEP_SUMMARY
           echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
 
   # Build and push frontend image
@@ -89,11 +85,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.FRONTEND_IMAGE }}
+          images: ${{ env.DOCKER_REPO }}
           tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,value=frontend-latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,value=frontend-{{branch}}
+            type=raw,value=frontend-{{sha}}
 
       - name: Build and push Frontend Docker image
         uses: docker/build-push-action@v5
@@ -104,15 +100,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           target: production
-          # Remove cache-from/cache-to temporarily to avoid permission issues
-          # cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
-          # cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
       - name: Frontend build summary
         run: |
           echo "### Frontend Build Complete! 🚀" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ env.DOCKER_REPO }}" >> $GITHUB_STEP_SUMMARY
           echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
 
   # Notification job
@@ -129,6 +122,10 @@ jobs:
           echo "- **Backend:** ${{ needs.build-backend.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Frontend:** ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "View images at:" >> $GITHUB_STEP_SUMMARY
-          echo "- [Backend](https://hub.docker.com/r/pasan02/devops-backend)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Frontend](https://hub.docker.com/r/pasan02/devops-frontend)" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** [pasan02/devops](https://hub.docker.com/r/pasan02/devops)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Available Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`pasan02/devops:backend-latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`pasan02/devops:frontend-latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`pasan02/devops:backend-main\` or \`backend-master\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`pasan02/devops:frontend-main\` or \`frontend-master\`" >> $GITHUB_STEP_SUMMARY
