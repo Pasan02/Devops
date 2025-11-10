@@ -179,7 +179,7 @@ export default function Signup() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 ${
+                    className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-red-500 focus:border-red-500 ${
                       errors.firstName ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="First name"
@@ -201,7 +201,7 @@ export default function Signup() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 ${
+                    className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-red-500 focus:border-red-500 ${
                       errors.lastName ? "border-red-300" : "border-gray-300"
                     }`}
                     placeholder="Last name"
@@ -225,7 +225,7 @@ export default function Signup() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 ${
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-red-500 focus:border-red-500 ${
                     errors.email ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Enter your email"
@@ -248,7 +248,7 @@ export default function Signup() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 ${
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-red-500 focus:border-red-500 ${
                     errors.password ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Create a password"
@@ -271,7 +271,7 @@ export default function Signup() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 ${
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-red-500 focus:border-red-500 ${
                     errors.confirmPassword ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="Confirm your password"
