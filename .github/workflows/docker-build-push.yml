@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - master
     paths:
       - 'backend/**'
       - 'frontend/**'
@@ -12,10 +12,8 @@ on:
   pull_request:
     branches:
       - main
-      - develop
-  release:
-    types: [published]
-  workflow_dispatch: # Allows manual trigger
+      - master
+  workflow_dispatch:
 
 env:
   DOCKER_USERNAME: pasan02
@@ -23,32 +21,8 @@ env:
   FRONTEND_IMAGE: pasan02/devops-frontend
 
 jobs:
-  # Detect which services changed
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      backend: ${{ steps.changes.outputs.backend }}
-      frontend: ${{ steps.changes.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-              - '.github/workflows/docker-build-push.yml'
-            frontend:
-              - 'frontend/**'
-              - '.github/workflows/docker-build-push.yml'
-
   # Build and push backend image
   build-backend:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
     steps:
@@ -71,11 +45,8 @@ jobs:
           images: ${{ env.BACKEND_IMAGE }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
 
       - name: Build and push Backend Docker image
         uses: docker/build-push-action@v5
@@ -85,17 +56,20 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
           target: production
+          # Remove cache-from/cache-to temporarily to avoid permission issues
+          # cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
+          # cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
 
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Backend build summary
+        run: |
+          echo "### Backend Build Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
 
   # Build and push frontend image
   build-frontend:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
     steps:
@@ -118,11 +92,8 @@ jobs:
           images: ${{ env.FRONTEND_IMAGE }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
 
       - name: Build and push Frontend Docker image
         uses: docker/build-push-action@v5
@@ -132,21 +103,32 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
           target: production
+          # Remove cache-from/cache-to temporarily to avoid permission issues
+          # cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
+          # cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Frontend build summary
+        run: |
+          echo "### Frontend Build Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
 
-  # Notification job (optional)
+  # Notification job
   notify:
     needs: [build-backend, build-frontend]
     if: always()
     runs-on: ubuntu-latest
     
     steps:
-      - name: Build Status
+      - name: Build Status Summary
         run: |
-          echo "Backend build: ${{ needs.build-backend.result }}"
-          echo "Frontend build: ${{ needs.build-frontend.result }}"
+          echo "## Docker Build Status 🐳" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend:** ${{ needs.build-backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend:** ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View images at:" >> $GITHUB_STEP_SUMMARY
+          echo "- [Backend](https://hub.docker.com/r/pasan02/devops-backend)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Frontend](https://hub.docker.com/r/pasan02/devops-frontend)" >> $GITHUB_STEP_SUMMARY
