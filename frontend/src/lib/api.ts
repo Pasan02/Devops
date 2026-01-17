@@ -180,6 +180,18 @@ export const watchlistApi = {
         review: watchedData?.review
       }),
     }),
+    
+  // Get watchlist stats
+  getStats: () =>
+    apiRequest<{ 
+      statusStats: any[];
+      genreStats: any[];
+      recentActivity: any[];
+      yearlyStats: any[];
+      monthlyStats: any[];
+      userStats: any;
+      favoriteGenres: number[];
+    }>('/watchlist/stats'),
 };
 
 // Helper function to get full image URL from TMDB

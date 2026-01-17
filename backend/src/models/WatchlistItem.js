@@ -112,7 +112,7 @@ WatchlistItemSchema.methods.markAsWatched = function(userRating, review) {
 // Static method to get user's watch statistics
 WatchlistItemSchema.statics.getUserStats = async function(userId) {
   const stats = await this.aggregate([
-    { $match: { user: mongoose.Types.ObjectId(userId) } },
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
     {
       $group: {
         _id: '$status',
@@ -123,7 +123,7 @@ WatchlistItemSchema.statics.getUserStats = async function(userId) {
   ]);
 
   const genreStats = await this.aggregate([
-    { $match: { user: mongoose.Types.ObjectId(userId), status: 'watched' } },
+    { $match: { user: new mongoose.Types.ObjectId(userId), status: 'watched' } },
     { $unwind: '$genres' },
     {
       $group: {

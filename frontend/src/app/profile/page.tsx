@@ -2,84 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-
-// Mock data for user profile analytics
-const mockUserProfile = {
-  user: {
-    id: 1,
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    avatar: null,
-    joinDate: "2023-01-15",
-    lastLogin: "2024-09-08T10:30:00Z",
-  },
-  statistics: {
-    totalWatched: 147,
-    totalWatchTime: 12450, // in minutes
-    moviesWatched: 89,
-    tvShowsWatched: 58,
-    currentStreak: 12,
-    longestStreak: 25,
-  },
-  statusStats: [
-    { _id: "watched", count: 147, totalRuntime: 12450 },
-    { _id: "watchlist", count: 32, totalRuntime: 0 },
-    { _id: "watching", count: 5, totalRuntime: 850 },
-    { _id: "dropped", count: 3, totalRuntime: 180 },
-  ],
-  genreStats: [
-    { _id: 28, count: 25, name: "Action" },
-    { _id: 35, count: 22, name: "Comedy" },
-    { _id: 18, count: 19, name: "Drama" },
-    { _id: 878, count: 15, name: "Science Fiction" },
-    { _id: 53, count: 12, name: "Thriller" },
-    { _id: 27, count: 10, name: "Horror" },
-    { _id: 10749, count: 8, name: "Romance" },
-    { _id: 16, count: 7, name: "Animation" },
-  ],
-  yearlyStats: [
-    { _id: 2024, count: 67, totalRuntime: 5670 },
-    { _id: 2023, count: 80, totalRuntime: 6780 },
-  ],
-  monthlyStats: [
-    { _id: 1, count: 8, totalRuntime: 720 },
-    { _id: 2, count: 12, totalRuntime: 980 },
-    { _id: 3, count: 10, totalRuntime: 890 },
-    { _id: 4, count: 7, totalRuntime: 630 },
-    { _id: 5, count: 9, totalRuntime: 780 },
-    { _id: 6, count: 6, totalRuntime: 540 },
-    { _id: 7, count: 8, totalRuntime: 720 },
-    { _id: 8, count: 7, totalRuntime: 630 },
-    { _id: 9, count: 5, totalRuntime: 450 },
-  ],
-  recentActivity: [
-    {
-      _id: "1",
-      title: "Dune: Part Two",
-      mediaType: "movie",
-      status: "watched",
-      watchedDate: "2024-09-07T20:00:00Z",
-      userRating: 9,
-    },
-    {
-      _id: "2",
-      title: "The Bear",
-      mediaType: "tv",
-      status: "watching",
-      addedDate: "2024-09-05T15:30:00Z",
-    },
-    {
-      _id: "3",
-      title: "Oppenheimer",
-      mediaType: "movie",
-      status: "watched",
-      watchedDate: "2024-09-03T19:00:00Z",
-      userRating: 8,
-    },
-  ],
-  favoriteGenres: [28, 35, 18, 878, 53],
-};
+import { useAuth } from "@/hooks/useAuth";
+import { watchlistApi, authApi, movieApi } from "@/lib/api";
 
 const monthNames = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -87,6 +11,7 @@ const monthNames = [
 ];
 
 const formatTime = (minutes: number) => {
+  if (!minutes) return "0m";
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   
@@ -110,12 +35,66 @@ const getStatusColor = (status: string) => {
 };
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState(mockUserProfile);
+  const { userEmail, isAuthenticated } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [genreMap, setGenreMap] = useState<Record<number, string>>({});
 
-  const totalWatchTimeFormatted = formatTime(profile.statistics.totalWatchTime);
-  const avgRatingWatched = profile.statusStats.find(s => s._id === "watched")?.count || 0;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isAuthenticated) return;
+      
+      setIsLoading(true);
+      try {
+        const [statsRes, userRes, genresRes] = await Promise.all([
+          watchlistApi.getStats(),
+          authApi.getProfile(),
+          movieApi.getGenres()
+        ]);
+        
+        setProfile(statsRes.data);
+        setUserInfo(userRes.data.user);
+
+        const gMap: Record<number, string> = {};
+        if (genresRes && Array.isArray(genresRes)) {
+           genresRes.forEach((g: any) => {
+             gMap[g.id] = g.name;
+           });
+        }
+        setGenreMap(gMap);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+     return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-xl">Please sign in to view your profile.</div>
+        </div>
+     );
+  }
+
+  if (isLoading || !profile || !userInfo) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+           <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const totalWatchTimeFormatted = formatTime(profile.userStats?.totalWatchTime || 0);
+  const avgRatingWatched = profile.statusStats?.find((s: any) => s._id === "watched")?.count || 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,30 +105,32 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             {/* Avatar */}
-            <div className="w-24 h-24 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {profile.user.firstName[0]}{profile.user.lastName[0]}
+            <div className="w-24 h-24 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold uppercase">
+              {userInfo.firstName?.[0]}{userInfo.lastName?.[0]}
             </div>
             
             {/* User Info */}
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {profile.user.firstName} {profile.user.lastName}
+                {userInfo.firstName} {userInfo.lastName}
               </h1>
-              <p className="text-gray-600 mb-4">{profile.user.email}</p>
+              <p className="text-gray-600 mb-4">{userInfo.email}</p>
               <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                <span>Joined: {new Date(profile.user.joinDate).toLocaleDateString()}</span>
-                <span>Last active: {new Date(profile.user.lastLogin).toLocaleDateString()}</span>
+                <span>Joined: {new Date(userInfo.createdAt || Date.now()).toLocaleDateString()}</span>
+                {userInfo.lastLogin && (
+                    <span>Last active: {new Date(userInfo.lastLogin).toLocaleDateString()}</span>
+                )}
               </div>
             </div>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-4 text-center">
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-red-600">{profile.statistics.totalWatched}</div>
+                <div className="text-2xl font-bold text-red-600">{profile.userStats?.totalWatched || 0}</div>
                 <div className="text-sm text-gray-600">Total Watched</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-red-600">{profile.statistics.currentStreak}</div>
+                <div className="text-2xl font-bold text-red-600">{profile.userStats?.currentStreak || 0}</div>
                 <div className="text-sm text-gray-600">Current Streak</div>
               </div>
             </div>
@@ -191,7 +172,7 @@ export default function ProfilePage() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Watch Status Overview</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {profile.statusStats.map((stat) => (
+                  {profile.statusStats?.map((stat: any) => (
                     <div key={stat._id} className="text-center">
                       <div className="text-2xl font-bold text-gray-900">{stat.count}</div>
                       <div className={`inline-block px-2 py-1 rounded text-sm font-medium capitalize ${getStatusColor(stat._id)}`}>
@@ -199,6 +180,9 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   ))}
+                  {(!profile.statusStats || profile.statusStats.length === 0) && (
+                    <div className="text-center col-span-4 text-gray-500">No activity yet</div>
+                  )}
                 </div>
               </div>
 
@@ -211,11 +195,11 @@ export default function ProfilePage() {
                     <div className="text-sm text-gray-600">Total Watch Time</div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{profile.statistics.moviesWatched}</div>
+                    <div className="text-2xl font-bold text-red-600">{profile.userStats?.moviesWatched || 0}</div>
                     <div className="text-sm text-gray-600">Movies Watched</div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{profile.statistics.tvShowsWatched}</div>
+                    <div className="text-2xl font-bold text-red-600">{profile.userStats?.tvShowsWatched || 0}</div>
                     <div className="text-sm text-gray-600">TV Shows Watched</div>
                   </div>
                 </div>
@@ -223,9 +207,9 @@ export default function ProfilePage() {
 
               {/* Monthly Activity */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">2024 Monthly Activity</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">{new Date().getFullYear()} Monthly Activity</h2>
                 <div className="space-y-3">
-                  {profile.monthlyStats.map((month) => (
+                  {profile.monthlyStats?.map((month: any) => (
                     <div key={month._id} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <span className="w-12 text-sm text-gray-600">{monthNames[month._id - 1]}</span>
@@ -241,6 +225,9 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   ))}
+                  {(!profile.monthlyStats || profile.monthlyStats.length === 0) && (
+                    <div className="text-gray-500 text-center text-sm">No activity recorded this year</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -251,17 +238,20 @@ export default function ProfilePage() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Top Genres</h2>
                 <div className="space-y-3">
-                  {profile.genreStats.slice(0, 6).map((genre, index) => (
+                  {profile.genreStats?.slice(0, 6).map((genre: any, index: number) => (
                     <div key={genre._id} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <span className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           {index + 1}
                         </span>
-                        <span className="text-sm font-medium">{genre.name}</span>
+                        <span className="text-sm font-medium">{genreMap[genre._id] || "Unknown"}</span>
                       </div>
                       <span className="text-sm text-gray-600">{genre.count}</span>
                     </div>
                   ))}
+                  {(!profile.genreStats || profile.genreStats.length === 0) && (
+                    <div className="text-gray-500 text-center text-sm">No genres data available</div>
+                  )}
                 </div>
               </div>
 
@@ -271,11 +261,11 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Current Streak</span>
-                    <span className="text-2xl font-bold text-green-600">{profile.statistics.currentStreak} days</span>
+                    <span className="text-2xl font-bold text-green-600">{profile.userStats?.currentStreak || 0} days</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Longest Streak</span>
-                    <span className="text-2xl font-bold text-blue-600">{profile.statistics.longestStreak} days</span>
+                    <span className="text-2xl font-bold text-blue-600">{profile.userStats?.longestStreak || 0} days</span>
                   </div>
                 </div>
               </div>
@@ -289,7 +279,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Yearly Comparison</h2>
               <div className="space-y-4">
-                {profile.yearlyStats.map((year) => (
+                {profile.yearlyStats?.map((year: any) => (
                   <div key={year._id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-lg font-semibold">{year._id}</span>
@@ -297,10 +287,13 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-2xl font-bold text-red-600 mb-1">{year.count} items watched</div>
                     <div className="text-sm text-gray-600">
-                      Average: {Math.round(year.totalRuntime / year.count)} min per item
+                      Average: {year.count > 0 ? Math.round(year.totalRuntime / year.count) : 0} min per item
                     </div>
                   </div>
                 ))}
+                {(!profile.yearlyStats || profile.yearlyStats.length === 0) && (
+                    <div className="text-gray-500 text-center">No yearly data available</div>
+                )}
               </div>
             </div>
 
@@ -308,12 +301,13 @@ export default function ProfilePage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Genre Distribution</h2>
               <div className="space-y-3">
-                {profile.genreStats.map((genre) => {
-                  const percentage = Math.round((genre.count / profile.statistics.totalWatched) * 100);
+                {profile.genreStats?.map((genre: any) => {
+                  const total = profile.userStats?.totalWatched || 1; 
+                  const percentage = Math.round((genre.count / total) * 100);
                   return (
                     <div key={genre._id}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>{genre.name}</span>
+                        <span>{genreMap[genre._id] || "Unknown"}</span>
                         <span>{percentage}%</span>
                       </div>
                       <div className="bg-gray-200 rounded-full h-2">
@@ -325,6 +319,9 @@ export default function ProfilePage() {
                     </div>
                   );
                 })}
+                {(!profile.genreStats || profile.genreStats.length === 0) && (
+                   <div className="text-gray-500 text-center text-sm">No genre distribution data available</div>
+                )}
               </div>
             </div>
           </div>
@@ -334,7 +331,7 @@ export default function ProfilePage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
             <div className="space-y-4">
-              {profile.recentActivity.map((activity) => (
+              {profile.recentActivity?.map((activity: any) => (
                 <div key={activity._id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                   <div className="flex items-center space-x-4">
                     <div className={`w-3 h-3 rounded-full ${
@@ -361,6 +358,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))}
+              {(!profile.recentActivity || profile.recentActivity.length === 0) && (
+                <div className="text-center text-gray-500">No recent activity found. Start adding movies to your watchlist!</div>
+              )}
             </div>
           </div>
         )}
@@ -371,17 +371,20 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div>
                 <div className="block text-sm font-medium text-gray-700 mb-2">
-                  Favorite Genres
+                  Top Genres (by Watch Count)
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {profile.genreStats.slice(0, 5).map((genre) => (
+                  {profile.genreStats?.slice(0, 5).map((genre: any) => (
                     <span
                       key={genre._id}
                       className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium"
                     >
-                      {genre.name}
+                      {genreMap[genre._id] || "Unknown"}
                     </span>
                   ))}
+                  {(!profile.genreStats || profile.genreStats.length === 0) && (
+                    <span className="text-gray-500 text-sm">No watch history yet.</span>
+                  )}
                 </div>
               </div>
               
@@ -391,16 +394,16 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                   <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" defaultChecked />{" "}
-                    Email notifications for new releases
+                    <input type="checkbox" className="mr-2" defaultChecked={userInfo?.preferences?.notifications} disabled />{" "}
+                    Email notifications (Global)
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" defaultChecked />{" "}
-                    Weekly watch time summary
+                    <input type="checkbox" className="mr-2" disabled />{" "}
+                    Weekly watch time summary (Coming Soon)
                   </label>
                   <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" />{" "}
-                    Recommendations based on viewing history
+                    <input type="checkbox" className="mr-2" disabled />{" "}
+                    Recommendations based on viewing history (Coming Soon)
                   </label>
                 </div>
               </div>

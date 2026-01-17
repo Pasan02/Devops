@@ -208,7 +208,7 @@ const getWatchStats = asyncHandler(async (req, res, next) => {
   const yearlyStats = await WatchlistItem.aggregate([
     {
       $match: {
-        user: mongoose.Types.ObjectId(userId),
+        user: new mongoose.Types.ObjectId(userId),
         status: 'watched',
         watchedDate: { $exists: true },
       }
@@ -229,7 +229,7 @@ const getWatchStats = asyncHandler(async (req, res, next) => {
   const monthlyStats = await WatchlistItem.aggregate([
     {
       $match: {
-        user: mongoose.Types.ObjectId(userId),
+        user: new mongoose.Types.ObjectId(userId),
         status: 'watched',
         watchedDate: {
           $gte: new Date(currentYear, 0, 1),
