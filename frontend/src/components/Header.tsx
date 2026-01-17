@@ -1,24 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import SearchBar from "./SearchBar";
 
 export default function Header() {
-  const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, userEmail, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
     // Redirect to home page
     window.location.href = "/";
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-    }
   };
 
   return (
@@ -35,21 +27,7 @@ export default function Header() {
 
           {/* Search Bar */}
           <div className="flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What do you want to watch?"
-                className="w-full px-4 py-2 pl-4 pr-10 bg-transparent border border-gray-600 rounded-md focus:outline-none focus:border-white text-white placeholder-gray-400"
-              />
-              <button
-                type="submit"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                🔍
-              </button>
-            </form>
+            <SearchBar />
           </div>
 
           {/* Navigation */}

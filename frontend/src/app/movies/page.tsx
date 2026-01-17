@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
 import { Movie } from "@/types";
 import { movieApi } from "@/lib/api";
 
-export default function MoviesPage() {
+function MoviesContent() {
+  const searchParams = useSearchParams();
   const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,63 +17,49 @@ export default function MoviesPage() {
   const [sortBy, setSortBy] = useState<"title" | "year" | "rating">("title");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Load trending movies and TV shows
-        const [trendingMovies, trendingTV] = await Promise.all([
-          movieApi.getTrending('movie'),
-          movieApi.getTrending('tv')
-        ]);
-        
-        // Combine and format the data
-        const combinedData: Movie[] = [
-          ...(trendingMovies.data.results as any[]).slice(0, 10).map((movie: any) => ({
-            id: movie.id,
-            title: movie.title,
-            type: "Movie" as const,
-            year: movie.releaseDate ? new Date(movie.releaseDate).getFullYear().toString() : "Unknown",
-            rating: Math.round(movie.rating * 10) / 10,
-            poster: movie.posterPath || '',
-            overview: movie.overview,
-            genres: []
-          })),
-          ...(trendingTV.data.results as any[]).slice(0, 10).map((show: any) => ({
-            id: show.id,
-            title: show.title,
-            type: "TV Show" as const,
-            year: show.releaseDate ? new Date(show.releaseDate).getFullYear().toString() : "Unknown",
-            rating: Math.round(show.rating * 10) / 10,
-            poster: show.posterPath || '',
-            overview: show.overview,
-            genres: []
-          }))
-        ];
-        
-        setAllMovies(combinedData);
-      } catch (err) {
-        console.error('Error loading movies:', err);
-        setError('Failed to load movies. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
+  const fetchTrending = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [trendingMovies, trendingTV] = await Promise.all([
+        movieApi.getTrending('movie'),
+        movieApi.getTrending('tv')
+      ]);
+      
+      const combinedData: Movie[] = [
+        ...(trendingMovies.data.results as any[]).slice(0, 10).map((movie: any) => ({
+          id: movie.id,
+          title: movie.title,
+          type: "Movie" as const,
+          year: movie.releaseDate ? new Date(movie.releaseDate).getFullYear().toString() : "Unknown",
+          rating: Math.round(movie.rating * 10) / 10,
+          poster: movie.posterPath || '',
+          overview: movie.overview,
+          genres: []
+        })),
+        ...(trendingTV.data.results as any[]).slice(0, 10).map((show: any) => ({
+          id: show.id,
+          title: show.title,
+          type: "TV Show" as const,
+          year: show.releaseDate ? new Date(show.releaseDate).getFullYear().toString() : "Unknown",
+          rating: Math.round(show.rating * 10) / 10,
+          poster: show.posterPath || '',
+          overview: show.overview,
+          genres: []
+        }))
+      ];
+      
+      setAllMovies(combinedData);
+    } catch (err) {
+      console.error('Error loading movies:', err);
+      setError('Failed to load movies. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Handle search
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      // Reload initial data if search is cleared
-      window.location.reload();
-      return;
-    }
-
+  const performSearch = useCallback(async (query: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -97,7 +85,28 @@ export default function MoviesPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Handle search from input
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchQuery("");
+      fetchTrending();
+      return;
+    }
+    performSearch(query);
   };
+
+  // Load initial data or search results based on URL param
+  useEffect(() => {
+    const queryParam = searchParams.get("query");
+    if (queryParam) {
+      setSearchQuery(queryParam);
+      performSearch(queryParam);
+    } else {
+      fetchTrending();
+    }
+  }, [searchParams, fetchTrending, performSearch]);
 
   // Available genres
   const genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller"];
@@ -221,7 +230,7 @@ export default function MoviesPage() {
                     handleSearch(searchQuery);
                   }
                 }}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-500 focus:border-red-500"
               />
             </div>
           </div>
@@ -252,7 +261,7 @@ export default function MoviesPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as "title" | "year" | "rating")}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+              className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white text-gray-900 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
               <option value="title">Title</option>
               <option value="year">Year</option>
@@ -319,5 +328,25 @@ export default function MoviesPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function MoviesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    }>
+      <MoviesContent />
+    </Suspense>
   );
 }

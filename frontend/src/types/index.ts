@@ -43,11 +43,15 @@ export interface TVShow {
 
 export interface WatchlistItem extends Movie {
   addedDate: string;
+  _id?: string; // Backend MongoDB ID
 }
 
 export interface WatchedItem extends Movie {
   watchedDate: string;
   userRating?: number;
+  review?: string;
+  _id?: string; // Backend MongoDB ID
+}
   review?: string;
 }
 

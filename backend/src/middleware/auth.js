@@ -8,6 +8,7 @@ const authMiddleware = async (req, res, next) => {
     const authHeader = req.header('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Auth Middleware: No token provided');
       return res.status(401).json({
         success: false,
         message: 'No token provided, authorization denied',
@@ -15,17 +16,26 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.error('DEBUG_AUTH: Token extracted:', token.substring(0, 10) + '...');
 
     // Verify token
-    const decoded = jwt.verify(token, config.jwt.secret);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, config.jwt.secret);
+      console.error('DEBUG_AUTH: Decoded ID:', decoded.id);
+    } catch (e) {
+      console.error('DEBUG_AUTH: JWT Verify Failed:', e.message);
+      throw e; 
+    }
     
     // Get user from token
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
+      console.error('DEBUG_AUTH: User not found for ID:', decoded.id);
       return res.status(401).json({
         success: false,
-        message: 'Token is not valid',
+        message: 'Token is not valid - User not found',
       });
     }
 

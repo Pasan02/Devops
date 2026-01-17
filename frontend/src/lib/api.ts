@@ -32,7 +32,9 @@ const createHeaders = () => {
   
   const token = getAuthToken();
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    // Ensure token is clean (no quotes, no whitespace)
+    const cleanToken = token.replace(/^"(.*)"$/, '$1').trim();
+    headers.Authorization = `Bearer ${cleanToken}`;
   }
   
   return headers;
@@ -52,6 +54,12 @@ async function apiRequest<T>(
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 401 && typeof window !== 'undefined') {
+        // Token is invalid or expired
+        localStorage.removeItem('token');
+        localStorage.removeItem('userEmail');
+        window.dispatchEvent(new Event('authStateChanged'));
+      }
       throw new Error(data.message || `API request failed: ${response.status}`);
     }
 
@@ -137,16 +145,19 @@ export const authApi = {
 // Watchlist API functions
 export const watchlistApi = {
   // Get user's watchlist
-  getWatchlist: () =>
-    apiRequest<{ items: any[] }>('/watchlist'),
+  getWatchlist: (status: 'watchlist' | 'watched' = 'watchlist') =>
+    apiRequest<{ items: any[] }>(`/watchlist?status=${status}`),
 
   // Add item to watchlist
   addToWatchlist: (item: {
     tmdbId: number;
     mediaType: 'movie' | 'tv';
     title: string;
-    poster?: string;
+    posterPath?: string;
     releaseDate?: string;
+    voteAverage?: number;
+    overview?: string;
+    status?: 'watchlist' | 'watched' | 'watching' | 'dropped';
   }) =>
     apiRequest<{ message: string }>('/watchlist', {
       method: 'POST',
@@ -161,9 +172,13 @@ export const watchlistApi = {
 
   // Mark as watched
   markAsWatched: (itemId: string, watchedData?: { rating?: number; review?: string }) =>
-    apiRequest<{ message: string }>(`/watchlist/${itemId}/watched`, {
+    apiRequest<{ message: string; data: { item: any } }>(`/watchlist/${itemId}`, {
       method: 'PUT',
-      body: JSON.stringify(watchedData || {}),
+      body: JSON.stringify({
+        status: 'watched',
+        userRating: watchedData?.rating,
+        review: watchedData?.review
+      }),
     }),
 };
 
