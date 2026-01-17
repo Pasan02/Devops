@@ -35,14 +35,19 @@ pipeline {
                    script {
                         def remote = "ubuntu@${env.SERVER_IP}"
                         
-                        // Wait for SSH to be ready (rudimentary check)
+                        // Wait for SSH to be ready
                         sh "sleep 30" 
                         
-                        // StrictHostKeyChecking=no to avoid prompt for new servers
-                        sh "scp -o StrictHostKeyChecking=no -r docker-compose.yml backend frontend nginx mongodb-init ${remote}:/home/ubuntu/"
+                        // Compress files excluding node_modules and .git to speed up transfer
+                        sh "tar -czf project.tar.gz --exclude=node_modules --exclude=.git --exclude=.terraform ."
                         
+                        // Transfer the single tarball
+                        sh "scp -o StrictHostKeyChecking=no project.tar.gz ${remote}:/home/ubuntu/"
+                        
+                        // Unzip and Deploy
                         sh """
                         ssh -o StrictHostKeyChecking=no ${remote} '
+                            tar -xzf project.tar.gz && \
                             export TMDB_API_KEY="5d48393e4f2ef4e995c297e64192374d" && \
                             docker compose down && \
                             docker compose up -d --build
