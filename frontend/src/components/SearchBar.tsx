@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { movieApi, getImageUrl } from "@/lib/api";
 import { Movie } from "@/types";
 import Link from "next/link";
+import { useMovieTracker } from "@/hooks/useMovieTracker";
 
 export default function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +15,8 @@ export default function SearchBar() {
   const [totalResults, setTotalResults] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
+  const { addToWatchlist, markAsWatched, isInWatchlist, isWatched } = useMovieTracker();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,12 +111,16 @@ export default function SearchBar() {
       {isOpen && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-md rounded-2xl border border-purple-500/20 shadow-2xl overflow-hidden z-50">
           <ul>
-            {results.map((item) => (
-              <li key={`${item.type}-${item.id}`} className="border-b border-gray-800 last:border-0 hover:bg-white/5 transition-colors">
+            {results.map((item) => {
+              const inWatchlist = isInWatchlist(item.id);
+              const watched = isWatched(item.id);
+
+              return (
+              <li key={`${item.type}-${item.id}`} className="flex items-center justify-between border-b border-gray-800 last:border-0 hover:bg-white/5 transition-colors group">
                 <Link 
                   href={item.type === "Movie" ? `/movie/${item.id}` : `/tv/${item.id}`}
                   onClick={handleItemClick}
-                  className="flex items-center gap-4 p-4"
+                  className="flex items-center gap-4 p-4 flex-1 min-w-0"
                 >
                   <img 
                     src={item.poster} 
@@ -132,8 +139,41 @@ export default function SearchBar() {
                     </div>
                   </div>
                 </Link>
+
+                <div className="flex items-center gap-2 px-4">
+                  {!watched && !inWatchlist && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addToWatchlist(item);
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white rounded-full text-lg shadow-lg font-bold"
+                      title="Add to Watchlist"
+                    >
+                      +
+                    </button>
+                  )}
+                  
+                  {!watched && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        markAsWatched(item);
+                      }}
+                       className="w-8 h-8 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-full text-lg shadow-lg"
+                      title="Mark as Watched"
+                    >
+                      ✓
+                    </button>
+                  )}
+
+                  {watched && (
+                    <span className="text-green-500 text-xs font-medium px-2 bg-green-900/30 py-1 rounded">Watched</span>
+                  )}
+                </div>
               </li>
-            ))}
+              );
+            })}
             <li className="p-3 bg-purple-500/10 hover:bg-purple-500/20 text-center transition-colors">
               <button
                 onClick={handleSearch}
