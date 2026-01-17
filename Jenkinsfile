@@ -5,7 +5,7 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
-        SSH_PRIVATE_KEY       = credentials('ec2-ssh-key') # ID of SSH key credential in Jenkins
+        SSH_PRIVATE_KEY       = credentials('ec2-ssh-key') // ID of SSH key credential in Jenkins
     }
 
     stages {
