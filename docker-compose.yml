@@ -65,6 +65,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
+      args:
+        NEXT_PUBLIC_API_URL: /api
     container_name: movietracker-frontend
     restart: unless-stopped
     environment:

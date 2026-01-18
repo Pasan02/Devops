@@ -20,6 +20,8 @@ CMD ["npm", "run", "dev"]
 
 # Builder stage for production
 FROM base AS builder
+ARG NEXT_PUBLIC_API_URL=http://localhost:5000/api
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN npm ci
 COPY . .
 RUN chmod +x node_modules/.bin/* || true
