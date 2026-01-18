@@ -39,9 +39,9 @@ pipeline {
                         sh "sleep 30" 
                         
                         // Compress files excluding node_modules and .git to speed up transfer
-                        // Check if project.tar.gz exists and remove it first to avoid "file changed as we read it" error
+                        // Use tar with --warning=no-file-changed to ignore this benign warning
                         sh "rm -f project.tar.gz"
-                        sh "tar -czf project.tar.gz --exclude=node_modules --exclude=.git --exclude=.terraform --exclude=project.tar.gz ."
+                        sh "tar -czf project.tar.gz --exclude=node_modules --exclude=.git --exclude=.terraform --exclude=project.tar.gz --warning=no-file-changed ."
                         
                         // Transfer the single tarball
                         sh "scp -o StrictHostKeyChecking=no project.tar.gz ${remote}:/home/ubuntu/"
