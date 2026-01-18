@@ -53,7 +53,14 @@ pipeline {
                         // Unzip and Deploy
                         sh """
                         ssh -o StrictHostKeyChecking=no ${remote} '
-                            tar -xzf project.tar.gz && \
+                            # Ensure clean slate for nginx config to prevent directory/file conflict
+                            rm -rf nginx
+                            mkdir -p nginx
+                            
+                            # Extract files
+                            tar -xzf project.tar.gz
+                            
+                            # Deploy
                             export TMDB_API_KEY="5d48393e4f2ef4e995c297e64192374d" && \
                             docker compose down && \
                             docker compose up -d --build
