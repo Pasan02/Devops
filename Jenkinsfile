@@ -56,7 +56,7 @@ pipeline {
                             docker compose down || true
                             
                             # Use sudo to remove the directory because it might have been created by root/docker previously
-                            sudo rm -rf nginx
+                            sudo rm -rf nginx nginx-config
                             
                             # Extract files (which includes the nginx folder)
                             tar -xzf project.tar.gz
