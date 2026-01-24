@@ -65,40 +65,42 @@ export default function MovieCard({
         )}
         
         {/* Hover Actions */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 gap-2">
-          {!isWatched && !isInWatchlist && onAddToWatchlist && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 gap-2">
+          {onAddToWatchlist && (
             <button
-              onClick={handleAddToWatchlist}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddToWatchlist();
+              }}
+              className={`w-full ${isInWatchlist ? 'bg-gray-600 cursor-default' : 'bg-purple-600 hover:bg-purple-700'} text-white py-2 rounded-lg text-sm font-medium transition-colors duration-200`}
+              disabled={isInWatchlist}
             >
-              + Add to Watchlist
+              {isInWatchlist ? "In Watchlist" : "+ Add to Watchlist"}
             </button>
           )}
           
-          {isInWatchlist && !isWatched && onMarkWatched && (
+          {onMarkWatched && (
             <button
-              onClick={handleMarkWatched}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                handleMarkWatched();
+              }}
+              className={`w-full ${isWatched ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-lg text-sm font-medium transition-colors duration-200`}
+              disabled={isWatched}
             >
-              ✅ Mark Watched
+              {isWatched ? "✓ Watched" : "✓ Mark Watched"}
             </button>
           )}
           
-          {isWatched && !isInWatchlist && onAddToWatchlist && (
+          {onRemove && (isInWatchlist || isWatched) && (
             <button
-              onClick={handleAddToWatchlist}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+              onClick={(e) => {
+                e.preventDefault();
+                handleRemove();
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-medium transition-colors duration-200"
             >
-              📋 Add to Watchlist
-            </button>
-          )}
-          
-          {onRemove && (
-            <button
-              onClick={handleRemove}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200"
-            >
-              🗑️ Remove
+              Remove
             </button>
           )}
         </div>
