@@ -4,11 +4,13 @@ import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
+import { useMovieTracker } from "@/hooks/useMovieTracker";
 import { Movie } from "@/types";
 import { movieApi } from "@/lib/api";
 
 function MoviesContent() {
   const searchParams = useSearchParams();
+  const { addToWatchlist, markAsWatched, isInWatchlist, isWatched } = useMovieTracker();
   const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +109,20 @@ function MoviesContent() {
       fetchTrending();
     }
   }, [searchParams, fetchTrending, performSearch]);
+
+  const handleAddToWatchlist = (movieId: number) => {
+    const movie = allMovies.find(m => m.id === movieId);
+    if (movie) {
+      addToWatchlist(movie);
+    }
+  };
+
+  const handleMarkWatched = (movieId: number) => {
+    const movie = allMovies.find(m => m.id === movieId);
+    if (movie) {
+      markAsWatched(movie);
+    }
+  };
 
   // Available genres
   const genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller"];
@@ -312,6 +328,10 @@ function MoviesContent() {
                 year={movie.year}
                 rating={movie.rating}
                 poster={movie.poster}
+                isInWatchlist={isInWatchlist(movie.id)}
+                isWatched={isWatched(movie.id)}
+                onAddToWatchlist={handleAddToWatchlist}
+                onMarkWatched={handleMarkWatched}
               />
             ))}
           </div>
