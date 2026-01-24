@@ -18,6 +18,30 @@ function MoviesContent() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"title" | "year" | "rating">("title");
   const [searchQuery, setSearchQuery] = useState("");
+  const [genresMap, setGenresMap] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await movieApi.getGenres();
+        if (response.data) {
+          const map: Record<number, string> = {};
+          response.data.forEach((g) => {
+            map[g.id] = g.name;
+          });
+          setGenresMap(map);
+        }
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    };
+    fetchGenres();
+  }, []);
+
+  const getGenreNames = useCallback((genreIds: number[]) => {
+    if (!genreIds || !genresMap) return [];
+    return genreIds.map(id => genresMap[id]).filter(Boolean);
+  }, [genresMap]);
 
   const fetchTrending = useCallback(async () => {
     try {
@@ -38,7 +62,7 @@ function MoviesContent() {
           rating: Math.round(movie.rating * 10) / 10,
           poster: movie.posterPath || '',
           overview: movie.overview,
-          genres: []
+          genres: getGenreNames(movie.genreIds)
         })),
         ...(trendingTV.data.results as any[]).slice(0, 10).map((show: any) => ({
           id: show.id,
@@ -48,7 +72,7 @@ function MoviesContent() {
           rating: Math.round(show.rating * 10) / 10,
           poster: show.posterPath || '',
           overview: show.overview,
-          genres: []
+          genres: getGenreNames(show.genreIds)
         }))
       ];
       
@@ -59,7 +83,7 @@ function MoviesContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getGenreNames]);
 
   const performSearch = useCallback(async (query: string) => {
     try {
@@ -77,7 +101,7 @@ function MoviesContent() {
           rating: Math.round(item.rating * 10) / 10,
           poster: item.posterPath || '',
           overview: item.overview,
-          genres: []
+          genres: getGenreNames(item.genreIds)
         }));
       
       setAllMovies(formattedResults);
@@ -87,7 +111,7 @@ function MoviesContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getGenreNames]);
 
   // Handle search from input
   const handleSearch = async (query: string) => {
@@ -145,6 +169,13 @@ function MoviesContent() {
         if (activeTab === "tv") return movie.type === "TV Show";
         return true;
       });
+    }
+
+    // Filter by selected genres
+    if (selectedGenres.length > 0) {
+      filtered = filtered.filter(movie =>
+        movie.genres?.some(genre => selectedGenres.includes(genre))
+      );
     }
 
     // Sort movies

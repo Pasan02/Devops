@@ -58,8 +58,8 @@ export default function ProfilePage() {
         setUserInfo(userRes.data.user);
 
         const gMap: Record<number, string> = {};
-        if (genresRes && Array.isArray(genresRes)) {
-           genresRes.forEach((g: any) => {
+        if (genresRes && genresRes.data && Array.isArray(genresRes.data)) {
+           genresRes.data.forEach((g: any) => {
              gMap[g.id] = g.name;
            });
         }
