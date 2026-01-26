@@ -113,9 +113,7 @@ const getGenres = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: {
-      genres,
-    },
+    data: genres,
   });
 });
 
