@@ -244,7 +244,7 @@ export default function ProfilePage() {
                         <span className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           {index + 1}
                         </span>
-                        <span className="text-sm font-medium">{genreMap[genre._id] || "Unknown"}</span>
+                        <span className="text-sm font-medium text-gray-900">{genreMap[genre._id] || "Unknown"}</span>
                       </div>
                       <span className="text-sm text-gray-600">{genre.count}</span>
                     </div>
@@ -282,7 +282,7 @@ export default function ProfilePage() {
                 {profile.yearlyStats?.map((year: any) => (
                   <div key={year._id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-lg font-semibold">{year._id}</span>
+                      <span className="text-lg font-semibold text-gray-900">{year._id}</span>
                       <span className="text-sm text-gray-600">{formatTime(year.totalRuntime)}</span>
                     </div>
                     <div className="text-2xl font-bold text-red-600 mb-1">{year.count} items watched</div>
@@ -307,8 +307,8 @@ export default function ProfilePage() {
                   return (
                     <div key={genre._id}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>{genreMap[genre._id] || "Unknown"}</span>
-                        <span>{percentage}%</span>
+                        <span className="text-gray-900">{genreMap[genre._id] || "Unknown"}</span>
+                        <span className="text-gray-600">{percentage}%</span>
                       </div>
                       <div className="bg-gray-200 rounded-full h-2">
                         <div
@@ -335,12 +335,14 @@ export default function ProfilePage() {
                 <div key={activity._id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                   <div className="flex items-center space-x-4">
                     <div className={`w-3 h-3 rounded-full ${
-                      activity.mediaType === 'movie' ? 'bg-blue-500' : 'bg-green-500'
+                      activity.status === 'watched' ? 'bg-green-500' : 
+                      activity.status === 'watchlist' ? 'bg-yellow-500' :
+                      activity.status === 'watching' ? 'bg-blue-500' : 'bg-red-500'
                     }`}></div>
                     <div>
-                      <div className="font-medium">{activity.title}</div>
+                      <div className="font-medium text-gray-900">{activity.title}</div>
                       <div className="text-sm text-gray-600 capitalize">
-                        {activity.mediaType} • {activity.status}
+                        {activity.mediaType === 'movie' ? 'Movie' : 'TV Show'} • {activity.status}
                         {activity.userRating && ` • Rated ${activity.userRating}/10`}
                       </div>
                     </div>
@@ -377,7 +379,7 @@ export default function ProfilePage() {
                   {profile.genreStats?.slice(0, 5).map((genre: any) => (
                     <span
                       key={genre._id}
-                      className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium"
+                      className="bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded-full text-sm font-medium"
                     >
                       {genreMap[genre._id] || "Unknown"}
                     </span>
@@ -393,15 +395,15 @@ export default function ProfilePage() {
                   Notification Settings
                 </div>
                 <div className="space-y-2">
-                  <label className="flex items-center">
+                  <label className="flex items-center text-gray-700">
                     <input type="checkbox" className="mr-2" defaultChecked={userInfo?.preferences?.notifications} disabled />{" "}
                     Email notifications (Global)
                   </label>
-                  <label className="flex items-center">
+                  <label className="flex items-center text-gray-700">
                     <input type="checkbox" className="mr-2" disabled />{" "}
                     Weekly watch time summary (Coming Soon)
                   </label>
-                  <label className="flex items-center">
+                  <label className="flex items-center text-gray-700">
                     <input type="checkbox" className="mr-2" disabled />{" "}
                     Recommendations based on viewing history (Coming Soon)
                   </label>

@@ -19,6 +19,7 @@ function MoviesContent() {
   const [sortBy, setSortBy] = useState<"title" | "year" | "rating">("title");
   const [searchQuery, setSearchQuery] = useState("");
   const [genresMap, setGenresMap] = useState<Record<number, string>>({});
+  const [availableGenres, setAvailableGenres] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -26,10 +27,13 @@ function MoviesContent() {
         const response = await movieApi.getGenres();
         if (response.data) {
           const map: Record<number, string> = {};
+          const names: string[] = [];
           response.data.forEach((g) => {
             map[g.id] = g.name;
+            names.push(g.name);
           });
           setGenresMap(map);
+          setAvailableGenres(names.sort());
         }
       } catch (error) {
         console.error("Error fetching genres:", error);
@@ -62,7 +66,8 @@ function MoviesContent() {
           rating: Math.round(movie.rating * 10) / 10,
           poster: movie.posterPath || '',
           overview: movie.overview,
-          genres: getGenreNames(movie.genreIds)
+          genreIds: movie.genreIds || [],
+          genres: [] 
         })),
         ...(trendingTV.data.results as any[]).slice(0, 10).map((show: any) => ({
           id: show.id,
@@ -72,7 +77,8 @@ function MoviesContent() {
           rating: Math.round(show.rating * 10) / 10,
           poster: show.posterPath || '',
           overview: show.overview,
-          genres: getGenreNames(show.genreIds)
+          genreIds: show.genreIds || [],
+          genres: []
         }))
       ];
       
@@ -83,7 +89,7 @@ function MoviesContent() {
     } finally {
       setLoading(false);
     }
-  }, [getGenreNames]);
+  }, []);
 
   const performSearch = useCallback(async (query: string) => {
     try {
@@ -101,7 +107,8 @@ function MoviesContent() {
           rating: Math.round(item.rating * 10) / 10,
           poster: item.posterPath || '',
           overview: item.overview,
-          genres: getGenreNames(item.genreIds)
+          genreIds: item.genreIds || [],
+          genres: []
         }));
       
       setAllMovies(formattedResults);
@@ -111,7 +118,7 @@ function MoviesContent() {
     } finally {
       setLoading(false);
     }
-  }, [getGenreNames]);
+  }, []);
 
   // Handle search from input
   const handleSearch = async (query: string) => {
@@ -149,7 +156,7 @@ function MoviesContent() {
   };
 
   // Available genres
-  const genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller"];
+  // const genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller"];
 
   // Filter and sort movies based on user selections
   const filteredAndSortedMovies = useMemo(() => {
@@ -173,9 +180,11 @@ function MoviesContent() {
 
     // Filter by selected genres
     if (selectedGenres.length > 0) {
-      filtered = filtered.filter(movie =>
-        movie.genres?.some(genre => selectedGenres.includes(genre))
-      );
+      filtered = filtered.filter(movie => {
+        // Resolve genre names dynamically
+        const movieGenres = (movie.genreIds || []).map(id => genresMap[id]);
+        return movieGenres.some(genre => genre && selectedGenres.includes(genre));
+      });
     }
 
     // Sort movies
@@ -320,7 +329,7 @@ function MoviesContent() {
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Genres:</label>
             <div className="flex flex-wrap gap-2">
-              {genres.map((genre) => (
+              {availableGenres.map((genre) => (
                 <button
                   key={genre}
                   onClick={() => handleGenreToggle(genre)}
