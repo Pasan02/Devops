@@ -20,7 +20,7 @@ CMD ["npm", "run", "dev"]
 
 # Builder stage for production
 FROM base AS builder
-ARG NEXT_PUBLIC_API_URL=http://localhost:5000/api
+ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN npm ci
 COPY . .

@@ -39,7 +39,7 @@ services:
       JWT_EXPIRE: 7d
       TMDB_API_KEY: ${TMDB_API_KEY}
       TMDB_BASE_URL: https://api.themoviedb.org/3
-      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+      CORS_ORIGIN: "*"
       RATE_LIMIT_WINDOW_MS: 900000
       RATE_LIMIT_MAX_REQUESTS: 100
       BCRYPT_SALT_ROUNDS: 12
@@ -71,7 +71,6 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://ec2-18-232-135-75.compute-1.amazonaws.com:5000/api
     ports:
       - "3000:3000"
     depends_on:

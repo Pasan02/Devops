@@ -313,13 +313,3 @@ The application follows a **"simple and sophisticated"** design approach:
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
-
-**Built with ❤️ using modern web technologies and DevOps best practices**
-
-
-
-**Docker Command for database
-
-docker exec -it movietracker-mongodb mongosh mongodb://admin:password123@localhost:27017/movietracker?authSource=admin
-
-db.users.find().pretty()
