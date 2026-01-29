@@ -89,76 +89,6 @@ This full-stack application allows users to:
 └── README.md
 ```
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18 or higher
-- MongoDB (local or cloud)
-- TMDB API key ([Get it here](https://www.themoviedb.org/settings/api))
-
-### Development Setup
-
-1. **Clone and setup**:
-   ```bash
-   # Install frontend dependencies
-   cd frontend
-   npm install
-   
-   # Install backend dependencies
-   cd ../backend
-   npm install
-   ```
-
-2. **Configure backend environment**:
-   ```bash
-   cd backend
-   cp .env.example .env
-   # Edit .env and add your TMDB API key
-   ```
-
-3. **Start MongoDB**:
-   ```bash
-   # Local MongoDB
-   mongod
-   
-   # Or Docker
-   docker run -d -p 27017:27017 --name mongodb mongo:latest
-   ```
-
-4. **Start development servers**:
-   ```bash
-   # Terminal 1: Backend (http://localhost:5000)
-   cd backend
-   npm run dev
-   
-   # Terminal 2: Frontend (http://localhost:3001)
-   cd frontend
-   npm run dev
-   ```
-
-### Docker Setup
-
-1. **Development with Docker**:
-   ```bash
-   # Start all services
-   docker-compose -f docker-compose.dev.yml up
-   
-   # Access:
-   # Frontend: http://localhost:3001
-   # Backend: http://localhost:5000
-   # MongoDB: localhost:27017
-   ```
-
-2. **Production with Docker**:
-   ```bash
-   # Build and start
-   docker-compose up -d
-   
-   # Access:
-   # Frontend: http://localhost:3000
-   # Backend: http://localhost:5000
-   ```
-
 ## 🌟 Key Features Showcase
 
 ### 1. **Sophisticated User Profile Dashboard**
@@ -292,21 +222,6 @@ The application follows a **"simple and sophisticated"** design approach:
 - **Caching**: Redis implementation
 - **Search**: Elasticsearch integration
 
-## 📝 Getting TMDB API Key
-
-1. Visit [TMDB](https://www.themoviedb.org/)
-2. Create an account
-3. Go to Settings > API
-4. Request an API key
-5. Add it to your `.env` file
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
 
 ## 📄 License
 
