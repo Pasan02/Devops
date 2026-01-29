@@ -72,6 +72,10 @@ TMDB_API_KEY=${TMDB_API_KEY}
                             ssh -o StrictHostKeyChecking=no ${remote} '
                                 docker compose down || true
                                 
+                                # Clean up unused Docker objects to free space before build
+                                docker system prune -af
+                                docker builder prune -af
+
                                 # Use sudo to remove the directory because it might have been created by root/docker previously
                                 sudo rm -rf nginx nginx-config
                                 
