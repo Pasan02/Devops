@@ -8,6 +8,13 @@ variable "key_name" {
   default     = "my-app-key" 
 }
 
+variable "workplace_ip" {
+  description = "Workplace IP address for SSH access"
+  type        = string
+  default     = "112.135.70.20/32" # Placeholder: Update this or pass via Jenkins
+}
+
+
 # --- Networking Setup ---
 resource "aws_vpc" "main_vpc" {
   cidr_block           = "10.0.0.0/16"
@@ -66,7 +73,8 @@ resource "aws_security_group" "app_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    # Restricted to Home and Workplace IPs
+    cidr_blocks = ["112.135.70.20/32", var.workplace_ip]
   }
 
   ingress {
@@ -79,20 +87,6 @@ resource "aws_security_group" "app_sg" {
   ingress {
     from_port   = 443
     to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5000
-    to_port     = 5000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
