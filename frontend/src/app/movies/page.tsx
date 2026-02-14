@@ -256,7 +256,7 @@ function MoviesContent() {
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Movies & TV Shows</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Movie & TV Shows</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Explore trending movies and TV shows, search for your favorites, and discover new content to add to your watchlist.
           </p>

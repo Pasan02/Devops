@@ -69,12 +69,14 @@ resource "aws_security_group" "app_sg" {
   description = "Allow HTTP, HTTPS, SSH, and App ports"
   vpc_id      = aws_vpc.main_vpc.id
 
+  # Allow Developer Access (Includes local Jenkins server)
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    # Restricted to Home and Workplace IPs
-    cidr_blocks = ["112.135.70.20/32", var.workplace_ip]
+    # Restricted to Developer + Jenkins + AWS Instance Connect (Backup)
+    cidr_blocks = ["112.135.70.20/32", var.workplace_ip, "18.206.107.24/29"]
+    description = "Developer, Jenkins, and AWS Connect Access"
   }
 
   ingress {
