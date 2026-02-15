@@ -7,7 +7,7 @@ export default function FeaturedSection() {
 
   const featuredMovie = {
     id: 999,
-    title: "John Wick 3: Parabellum",
+    title: "Pasan Ranaweera",
     type: "Movie" as const,
     year: "2019",
     rating: 8.6,
