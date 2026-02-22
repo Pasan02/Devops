@@ -1,32 +1,73 @@
 "use client";
 
 import { useMovieTracker } from "@/hooks/useMovieTracker";
+import { useEffect, useState } from "react";
+import { movieApi } from "@/lib/api";
+import { TMDBMovie } from "@/types";
 
 export default function FeaturedSection() {
   const { addToWatchlist } = useMovieTracker();
+  const [featuredMovie, setFeaturedMovie] = useState<TMDBMovie | null>(null);
 
-  const featuredMovie = {
-    id: 999,
-    title: "Pasan Ranaweera",
-    type: "Movie" as const,
-    year: "2019",
-    rating: 8.6,
-    runtime: 130,
-    description: "John Wick is on the run after killing a member of the international assassins' guild, and with a $14 million price tag on his head, he is the target of hit men and women everywhere.",
-    poster: "https://via.placeholder.com/400x600/1a1a1a/ffffff?text=John+Wick+3"
-  };
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const response = await movieApi.getTrending('movie', 'day');
+        if (response.results && response.results.length > 0) {
+          // Get the first item or a random one from the top 5
+          setFeaturedMovie(response.results[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch featured movie:", error);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
 
   const handleAddToWatchlist = () => {
-    addToWatchlist(featuredMovie);
+    if (!featuredMovie) return;
+    
+    addToWatchlist({
+      id: featuredMovie.id,
+      title: featuredMovie.title,
+      type: "Movie",
+      year: featuredMovie.releaseDate ? new Date(featuredMovie.releaseDate).getFullYear().toString() : "",
+      rating: featuredMovie.rating,
+      poster: featuredMovie.posterPath || "", 
+      overview: featuredMovie.overview,
+      releaseDate: featuredMovie.releaseDate
+    });
   };
 
+  if (!featuredMovie) {
+    // Loading skeleton or fallback
+    return (
+      <section className="relative bg-gray-900 text-white min-h-[500px] flex items-center animate-pulse">
+        <div className="container mx-auto px-4">
+           <div className="h-8 bg-gray-800 w-1/3 mb-4 rounded"></div>
+           <div className="h-4 bg-gray-800 w-1/4 mb-4 rounded"></div>
+           <div className="h-32 bg-gray-800 w-1/2 rounded"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="relative bg-gray-900 text-white min-h-[500px] flex items-center">
+    <section className="relative bg-gray-900 text-white min-h-[500px] flex items-center overflow-hidden">
+      {/* Background Image */}
+      {featuredMovie.backdropPath && (
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${featuredMovie.backdropPath})` }}
+        ></div>
+      )}
+
       {/* Background Image Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent z-10"></div>
       
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-20">
+      {/* Background Pattern - Optional on top of image */}
+      <div className="absolute inset-0 opacity-20 z-10">
         <div className="w-full h-full bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20"></div>
       </div>
 
@@ -38,34 +79,43 @@ export default function FeaturedSection() {
           <div className="flex items-center space-x-4 mb-4">
             <div className="flex items-center space-x-1">
               <span className="bg-yellow-500 text-black px-2 py-1 rounded text-sm font-bold">IMDb</span>
-              <span>{featuredMovie.rating * 10}/100</span>
+              <span>{(featuredMovie.rating * 10).toFixed(0)}/100</span>
             </div>
             <div className="flex items-center space-x-1">
-              <span className="text-red-500">🍅</span>
-              <span>97%</span>
+              {featuredMovie.releaseDate && (
+                <span className="text-gray-300">{new Date(featuredMovie.releaseDate).getFullYear()}</span>
+              )}
             </div>
           </div>
 
-          <p className="text-gray-300 mb-6 leading-relaxed">
-            {featuredMovie.description}
+          <p className="text-gray-300 mb-6 leading-relaxed line-clamp-3">
+            {featuredMovie.overview}
           </p>
 
           <button 
             onClick={handleAddToWatchlist}
             className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded flex items-center space-x-2 transition-colors"
           >
-            <span>▶</span>
-            <span>WATCH TRAILER</span>
+            <span>+</span>
+            <span>ADD TO WATCHLIST</span>
           </button>
         </div>
 
         {/* Featured Movie Image/Poster on the right */}
         <div className="absolute right-8 top-1/2 transform -translate-y-1/2 hidden lg:block">
-          <div className="w-64 h-96 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full flex items-center justify-center">
-            <div className="w-48 h-72 bg-gray-800 rounded-lg flex items-center justify-center text-6xl">
-              🎬
+          {featuredMovie.posterPath ? (
+            <img 
+              src={featuredMovie.posterPath} 
+              alt={featuredMovie.title}
+              className="w-64 h-auto rounded-lg shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-64 h-96 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full flex items-center justify-center">
+              <div className="w-48 h-72 bg-gray-800 rounded-lg flex items-center justify-center text-6xl">
+                🎬
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

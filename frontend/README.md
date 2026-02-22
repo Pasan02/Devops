@@ -1,45 +1,24 @@
 # Movie & TV Show Tracker - Frontend
 
-A modern, responsive web application built with Next.js and Tailwind CSS for tracking movies and TV shows.
+This directory contains the Next.js frontend for the Movie/TV Show Tracker application.
 
-## 🚀 Features
+**For full project setup and running instructions, please refer to the [Root README](../README.md).**
 
-- **Search Functionality**: Search for movies and TV shows
-- **Watchlist Management**: Add movies and shows to your personal watchlist
-- **Watch History**: Track what you've already watched
-- **Real-time Stats**: See your watchlist and viewing statistics
-- **Trending Content**: Discover trending movies and TV shows
-- **Responsive Design**: Works perfectly on desktop and mobile devices
-- **Modern UI**: Beautiful gradient design with smooth animations
+## 🛠️ Local Development
 
-## 🛠️ Tech Stack
+To run the frontend independently:
 
-- **Framework**: Next.js 15.5.2 with App Router
-- **Styling**: Tailwind CSS
-- **Language**: TypeScript
-- **State Management**: React Hooks + Local Storage
-- **Development**: Turbopack for fast development
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-## 📦 Installation & Setup
+2.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd frontend
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+3.  Navigate to `http://localhost:3000`.
 
 ## 📁 Project Structure
 
@@ -105,21 +84,12 @@ The application is fully responsive with:
 - Touch-friendly interactions
 - Optimized typography scaling
 
-## 🔮 Future Enhancements
+## 🔮 Roadmap
 
-- Integration with TMDB API for real movie data
-- User authentication and profiles
-- Search functionality with filters
-- Movie ratings and reviews
-- Social features (sharing lists)
-- Offline support with PWA features
-
-## 🐛 Known Issues
-
-- Currently uses mock data (API integration pending)
-- Search functionality is placeholder (to be implemented)
-- No user authentication yet
+- Comprehensive unit and E2E testing
+- PWA support for offline access
+- Enhanced social features
 
 ## 📄 License
 
-This project is part of a larger DevOps demonstration application showcasing modern web development and deployment practices.
+This project is licensed under the MIT License.

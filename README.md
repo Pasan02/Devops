@@ -1,6 +1,6 @@
 # Movie/TV Show Tracker - Full Stack Application
 
-A comprehensive movie and TV show tracking application built with modern technologies and DevOps best practices.
+A comprehensive movie and TV show tracking application built with modern technologies and DevOps best practices. This full-stack solution features a robust Node.js/Express backend with MongoDB and a responsive Next.js frontend.
 
 ## 🎯 Project Overview
 
@@ -17,7 +17,7 @@ This full-stack application allows users to:
 - **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS 4
 - **Language**: TypeScript
-- **State Management**: Custom React hooks with localStorage
+- **State Management**: Custom React hooks
 - **UI Components**: Clean, sophisticated design with responsive layouts
 
 ### Backend (Express.js)
@@ -27,27 +27,94 @@ This full-stack application allows users to:
 - **External API**: TMDB (The Movie Database)
 - **Security**: Helmet, CORS, rate limiting, input validation
 
-### Key Features Implemented
+### Infrastructure & DevOps
+- **Containerization**: Docker & Docker Compose
+- **Orchestration**: Docker Compose for local development
+- **CI/CD**: Jenkins pipeline for automated testing and deployment
+- **Infrastructure as Code**: Terraform for infrastructure provisioning
+- **Web Server**: Nginx as a reverse proxy
 
-#### 🎬 **Movie & TV Show Management**
-- Search functionality with TMDB integration
-- Trending and popular content discovery
-- Detailed movie/TV show information pages
-- Genre-based filtering and discovery
+## 🚀 Getting Started
 
-#### 👤 **User Management**
-- User registration and authentication
-- Profile management with preferences
-- Secure password handling with bcrypt
-- JWT token-based sessions
+### Prerequisites
+- Docker and Docker Compose
+- Node.js 18+ (for local development without Docker)
+- TMDB API Key (Get one from [The Movie Database](https://www.themoviedb.org/documentation/api))
 
-#### 📊 **Comprehensive Analytics Dashboard**
-- **Watch Statistics**: Total watched items, watch time, current/longest streaks
-- **Genre Analysis**: Most watched genres with counts and percentages
-- **Viewing Patterns**: Monthly/yearly viewing statistics with visual charts
-- **Recent Activity**: Timeline of recent watch activity
-- **Progress Tracking**: TV show episode/season progress
-- **Rating History**: User ratings and reviews
+### Quick Start (Docker Compose)
+
+The easiest way to run the application is using Docker Compose.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd movie-tracker
+    ```
+
+2.  **Environment Setup:**
+    Create a `.env` file in the root directory (or separate `.env` files in `backend/` and `frontend/` if running locally).
+    
+    Example `.env` configuration (see `backend/.env.example` for details):
+    ```env
+    MONGO_USER=admin
+    MONGO_PASSWORD=password
+    JWT_SECRET=your_secret_key
+    TMDB_API_KEY=your_tmdb_api_key
+    ```
+
+3.  **Run with Docker Compose:**
+    ```bash
+    docker-compose up --build
+    ```
+    
+    The services will enable:
+    - **Frontend**: http://localhost:3000
+    - **Backend API**: http://localhost:5000
+    - **MongoDB**: localhost:27017
+
+### Manual Local Development
+
+If you prefer to run services individually:
+
+#### Backend
+1.  Navigate to `backend/`
+2.  Install dependencies: `npm install`
+3.  Set up `.env` file with MongoDB URI and TMDB Key.
+4.  Run server: `npm run dev`
+
+#### Frontend
+1.  Navigate to `frontend/`
+2.  Install dependencies: `npm install`
+3.  Run development server: `npm run dev`
+
+## 📚 API Documentation
+
+The backend exposes a RESTful API. Key endpoints include:
+
+-   **Auth**: `/api/auth/register`, `/api/auth/login`
+-   **Movies**: `/api/movies/search`, `/api/movies/trending`
+-   **Watchlist**: `/api/watchlist`, `/api/watchlist/:id`
+
+See [backend/README.md](backend/README.md) for detailed API documentation if needed.
+
+## 📂 Project Structure
+
+```
+.
+├── backend/            # Express.js API
+├── frontend/           # Next.js Frontend
+├── docker-compose.yml  # Container orchestration
+├── Jenkinsfile         # CI/CD Pipeline pipeline
+├── terraform/          # Infrastructure provisioning
+└── nginx/              # Nginx configuration
+```
+
+## 🔐 Security Features
+
+- **JWT Authentication**: Secure stateless authentication
+- **Password Hashing**: Bcrypt for password storage
+- **Rate Limiting**: Protection against brute-force attacks
+- **Data Validation**: Input sanitization using express-validator
 
 #### 🎯 **Watchlist Features**
 - Add movies/TV shows to personal watchlist

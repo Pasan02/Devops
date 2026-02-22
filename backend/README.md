@@ -1,28 +1,31 @@
 # Movie Tracker Backend API
 
-A comprehensive REST API for managing movie and TV show watchlists with user authentication, TMDB integration, and detailed analytics.
+This directory contains the backend API for the Movie/TV Show Tracker application.
 
-## Features
+**For full project setup and running instructions, please refer to the [Root README](../README.md).**
 
-- **User Authentication**: JWT-based authentication with registration, login, and profile management
-- **Watchlist Management**: Add, update, remove movies and TV shows from personal watchlists
-- **TMDB Integration**: Real-time movie and TV show data from The Movie Database API
-- **Analytics & Statistics**: Comprehensive user viewing statistics, genre preferences, and watch history
-- **Rate Limiting**: Built-in protection against API abuse
-- **Error Handling**: Comprehensive error handling with proper HTTP status codes
-- **Data Validation**: Input validation and sanitization for all endpoints
+## 🛠️ Development
 
-## Tech Stack
+To run the backend independently for development:
 
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT (JSON Web Tokens)
-- **External API**: TMDB (The Movie Database)
-- **Security**: Helmet, CORS, Rate limiting
-- **Validation**: Express Validator
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-## API Endpoints
+2.  **Environment Variables**:
+    Create a `.env` file based on `.env.example`.
+    Ensure you have a MongoDB instance running.
+
+3.  **Start Server**:
+    ```bash
+    npm run dev  # Development
+    npm start    # Production
+    ```
+
+## 📚 API Reference
+
+Below is a detailed list of available API endpoints.
 
 ### Authentication
 ```
@@ -59,71 +62,7 @@ DELETE /api/watchlist/:id      - Delete watchlist item
 PATCH  /api/watchlist/:id/favorite - Toggle favorite status
 ```
 
-## Setup Instructions
-
-### Prerequisites
-- Node.js 18 or higher
-- MongoDB database
-- TMDB API key
-
-### Installation
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Environment configuration**:
-   Copy `.env.example` to `.env` and configure:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Required environment variables**:
-   ```env
-   # Server
-   PORT=5000
-   NODE_ENV=development
-   
-   # Database
-   MONGODB_URI=mongodb://localhost:27017/movietracker
-   
-   # JWT
-   JWT_SECRET=your-super-secret-jwt-key
-   JWT_EXPIRE=7d
-   
-   # TMDB API
-   TMDB_API_KEY=your-tmdb-api-key-here
-   
-   # CORS
-   CORS_ORIGIN=http://localhost:3000,http://localhost:3001
-   ```
-
-4. **Get TMDB API Key**:
-   - Visit [TMDB API](https://www.themoviedb.org/settings/api)
-   - Register for an account
-   - Request an API key
-   - Add it to your `.env` file
-
-5. **Start MongoDB**:
-   ```bash
-   # If using local MongoDB
-   mongod
-   
-   # Or use MongoDB Docker container
-   docker run -d -p 27017:27017 --name mongodb mongo:latest
-   ```
-
-6. **Start the server**:
-   ```bash
-   # Development mode
-   npm run dev
-   
-   # Production mode
-   npm start
-   ```
-
-## Database Schema
+## 🏗️ Database Schema
 
 ### User Model
 ```javascript
