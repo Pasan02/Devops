@@ -16,9 +16,26 @@ export default function FeaturedSection() {
         if (response.results && response.results.length > 0) {
           // Get the first item or a random one from the top 5
           setFeaturedMovie(response.results[0]);
+        } else {
+          throw new Error("No trending movies found");
         }
       } catch (error) {
-        console.error("Failed to fetch featured movie:", error);
+        console.error("Failed to fetch featured movie, using fallback:", error);
+        // Fallback to Zootopia 2
+        setFeaturedMovie({
+          id: 1022789,
+          title: "Zootopia 2",
+          overview: "After cracking the biggest case in Zootopia's history, rookie cops Judy Hopps and Nick Wilde find themselves on the twisting trail of a great mystery when Gary De'Snake arrives and turns the animal metropolis upside down. To crack the case, Judy and Nick must go undercover to unexpected new parts of town, where their growing partnership is tested like never before.",
+          releaseDate: "2025-11-26",
+          posterPath: "https://media.themoviedb.org/t/p/w600_and_h900_face/oJ7g2CifqpStmoYQyaLQgEU32qO.jpg",
+          backdropPath: "https://media.themoviedb.org/t/p/w1066_and_h600_face/7nfpkR9XsQ1lBNCXSSHxGV7Dkxe.jpg",
+          rating: 7.9,
+          voteCount: 1500,
+          popularity: 2500,
+          genreIds: [16, 35, 12, 10751, 9648],
+          mediaType: "movie",
+          adult: false
+        });
       }
     };
 
